@@ -5,7 +5,7 @@ import java.awt.event.*;
 public class Window extends JFrame {
     Container frame;
     Control control;
-    Container imageContainer;
+    Image imageContainer;
 
     public Window() {
         setSize(680, 550);
@@ -15,16 +15,11 @@ public class Window extends JFrame {
         frame = getContentPane();
         frame.setLayout(new BorderLayout());
 
-        control = new Control();
-        control.setBackground(Color.BLACK);
+        control = new Control(this);
         frame.add(control, BorderLayout.SOUTH);
 
-        imageContainer = new Container();
+        imageContainer = new Image(this);
         frame.add(imageContainer, BorderLayout.CENTER);
-
-        imageContainer.setLayout(new BorderLayout());
-        imageContainer.add(new JLabel("qwertz"), BorderLayout.CENTER);
-
     }
 
     public static void main(String[] args) {
