@@ -6,6 +6,7 @@ public class Window extends JFrame {
     Container frame;
     Control control;
     Image imageContainer;
+    BackgroundLoader backgroundLoader;
 
     public Window() {
         setSize(680, 550);
@@ -15,11 +16,15 @@ public class Window extends JFrame {
         frame = getContentPane();
         frame.setLayout(new BorderLayout());
 
+        backgroundLoader = new BackgroundLoader();
+        backgroundLoader.start();
+
         control = new Control(this);
         frame.add(control, BorderLayout.SOUTH);
 
         imageContainer = new Image(this);
         frame.add(imageContainer, BorderLayout.CENTER);
+
     }
 
     public static void main(String[] args) {

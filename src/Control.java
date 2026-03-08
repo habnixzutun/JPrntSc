@@ -14,38 +14,38 @@ import java.net.http.HttpResponse;
 
 public class Control extends Container {
     Window parent;
-    JButton back;
-    JButton save;
-    JButton block;
-    JButton openFolder;
-    JButton openBrowser;
-    JButton next;
+    JButton backButton;
+    JButton saveButton;
+    JButton blockButton;
+    JButton openFolderButton;
+    JButton openBrowserButton;
+    JButton nextButton;
     int height = 40;
     public Control(Window parent) {
         this.parent = parent;
         setPreferredSize(new Dimension(0, height));
         setLayout(new FlowLayout());
 
-        back = new JButton("Back");
-        save = new JButton("Save Image");
-        block = new JButton("Block Image");
-        openFolder = new JButton("Open Folder");
-        openBrowser = new JButton("Open Browser");
-        next = new JButton("Next");
+        backButton = new JButton("Back");
+        saveButton = new JButton("Save Image");
+        blockButton = new JButton("Block Image");
+        openFolderButton = new JButton("Open Folder");
+        openBrowserButton = new JButton("Open Browser");
+        nextButton = new JButton("Next");
 
-        back.addActionListener(new ButtonListener(this));
-        save.addActionListener(new ButtonListener(this));
-        block.addActionListener(new ButtonListener(this));
-        openFolder.addActionListener(new ButtonListener(this));
-        openBrowser.addActionListener(new ButtonListener(this));
-        next.addActionListener(new ButtonListener(this));
+        backButton.addActionListener(new ButtonListener(this));
+        saveButton.addActionListener(new ButtonListener(this));
+        blockButton.addActionListener(new ButtonListener(this));
+        openFolderButton.addActionListener(new ButtonListener(this));
+        openBrowserButton.addActionListener(new ButtonListener(this));
+        nextButton.addActionListener(new ButtonListener(this));
 
-        add(back);
-        add(save);
-        add(block);
-        add(openFolder);
-        add(openBrowser);
-        add(next);
+        add(backButton);
+        add(saveButton);
+        add(blockButton);
+        add(openFolderButton);
+        add(openBrowserButton);
+        add(nextButton);
     }
 
     static class ButtonListener implements ActionListener {
@@ -60,25 +60,25 @@ public class Control extends Container {
             System.out.println(button.getText());
             switch (button.getText()) {
                 case "Back":
-                    //goBack();
-                    parent.loadImage();
+                    parent.back();
                     break;
                 case "Save Image":
-                    //goBack();
+                    parent.save();
                     break;
                 case "Block Image":
-                    //goBack();
+                    parent.block();
                     break;
                 case "Open Folder":
-                    //goBack();
+                    parent.openFolder();
                     break;
                 case "Open Browser":
-                    //goBack();
+                    parent.openBrowser();
                     break;
                 case "Next":
-                    //goBack();
+                    parent.next();
                     break;
                 default:
+                    System.out.println("You misspelled or did not implement a button (or missed a break statement)");
                     break;
             }
         }
@@ -107,6 +107,20 @@ public class Control extends Container {
         catch (IOException | InterruptedException ex) {
             ex.getStackTrace();
         }
+    }
 
+    void back() {
+        parent.imageContainer.setImage(
+                parent.backgroundLoader.getPrevious()
+        );
+    }
+    void save() {}
+    void block () {}
+    void openFolder() {}
+    void openBrowser() {}
+    void next() {
+        parent.imageContainer.setImage(
+                parent.backgroundLoader.getNext()
+        );
     }
 }
