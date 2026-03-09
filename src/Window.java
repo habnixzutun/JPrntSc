@@ -12,12 +12,12 @@ public class Window extends JFrame {
         setSize(680, 550);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("prnt.sc");
+        setAutoRequestFocus(true);
+        setResizable(false);
 
         frame = getContentPane();
         frame.setLayout(new BorderLayout());
 
-        backgroundLoader = new BackgroundLoader();
-        backgroundLoader.start();
 
         control = new Control(this);
         frame.add(control, BorderLayout.SOUTH);
@@ -25,6 +25,8 @@ public class Window extends JFrame {
         imageContainer = new Image(this);
         frame.add(imageContainer, BorderLayout.CENTER);
 
+        backgroundLoader = new BackgroundLoader(this);
+        backgroundLoader.start();
     }
 
     public static void main(String[] args) {

@@ -3,14 +3,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.io.*;
+import java.security.NoSuchAlgorithmException;
+import java.util.NoSuchElementException;
 
 public class Control extends Container {
     Window parent;
@@ -84,43 +79,55 @@ public class Control extends Container {
         }
     }
 
-    void loadImage() {
-        try {
-            String imageUrl = "https://http.cat/404";
-
-            HttpClient client = HttpClient.newHttpClient();
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(imageUrl))
-                    .GET()
-                    .build();
-
-            HttpResponse<byte[]> response = client.send(
-                    request,
-                    HttpResponse.BodyHandlers.ofByteArray()
-            );
-
-            BufferedImage image = ImageIO.read(
-                    new ByteArrayInputStream(response.body()));
-            parent.imageContainer.setImage(image);
-        }
-        catch (IOException | InterruptedException ex) {
-            ex.getStackTrace();
-        }
-    }
-
     void back() {
-        parent.imageContainer.setImage(
-                parent.backgroundLoader.getPrevious()
-        );
+        try {
+            parent.imageContainer.setImage(
+                    parent.backgroundLoader.getPrevious()
+            );
+        }
+        catch (NoSuchElementException e) {
+            JOptionPane.showMessageDialog(parent, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
-    void save() {}
-    void block () {}
+    void save(){
+        try {
+            ImageIO.write(parent.backgroundLoader.getCurrent(), "png", new File("images/" + 1 + ".png"));
+            System.out.println("saved image");
+        }
+        catch (IOException e) {
+            JOptionPane.showMessageDialog(parent, "Das Bild konnte nicht gespeichert werden", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    void block () {
+        try {
+            String hash = Helper.sha1(parent.backgroundLoader.getCurrent());
+
+            try (FileWriter writer = new FileWriter("hashes.txt", true)) {
+                writer.write(hash + "\n");
+            }
+            parent.imageContainer.setImage(
+                    parent.backgroundLoader.removeCurrentImage()
+            );
+            System.out.println("blocked image");
+        }
+        catch (IOException | NoSuchAlgorithmException e) {
+            JOptionPane.showMessageDialog(parent, "Es ist ein Fehler aufgetreten", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+    }
+
     void openFolder() {}
+
     void openBrowser() {}
+
     void next() {
-        parent.imageContainer.setImage(
-                parent.backgroundLoader.getNext()
-        );
+        try {
+            parent.imageContainer.setImage(
+                    parent.backgroundLoader.getNext()
+            );
+        }
+        catch (NoSuchElementException e) {
+            JOptionPane.showMessageDialog(parent, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 }
