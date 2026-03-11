@@ -1,94 +1,157 @@
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Random;
+import java.net.URL;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 public class BackgroundLoader {
     Window parent;
-    private final ArrayList<BufferedImage> previous;
-    private final List<BufferedImage> next;
-    private BufferedImage current;
+    private final ArrayList<Image> previous;
+    private final ArrayList<Image> next;
+    private Image current;
     private final Thread thread;
     private final int maxBufferSize = 50;
+    private final Random random = new Random();
     BackgroundLoader(Window parent) {
         this.parent = parent;
-        previous = new ArrayList<>();
+        previous = new ArrayList<Image>();
         next = new ArrayList<>();
         thread = new Thread(this::searchAndStoreImages);
-
-        try {
-            current = getImage("https://http.cat/100");
-        }
-        catch (IOException | InterruptedException ex) {
-            ex.getStackTrace();
-        }
-
-
     }
 
-    private BufferedImage getImage(String url) throws IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
-                .GET()
-                .build();
-
-        HttpResponse<byte[]> response = client.send(
-                request,
-                HttpResponse.BodyHandlers.ofByteArray()
-        );
-
-        BufferedImage image = ImageIO.read(
-                new ByteArrayInputStream(response.body()));
-        return image;
-    }
-
-    String generateId() {
-        return "";
-    }
-
-    void searchAndStoreImages() {
-        int[] codes = new int[] {200, 400, 401, 403, 404, 500, 501};
+    private void searchAndStoreImages() {
         int maxRandomVariation = 300;
         int baseDelay = 500;
         int delay;
 
-        for (int code : codes) {
+        while (!Thread.currentThread().isInterrupted()) {
+            String currentImgId;
             try {
-                next.add(getImage("https://http.cat/" + code));
-                System.out.println("loaded image " + code);
+                if (next.size() > maxBufferSize) {
+                    Thread.sleep(200);
+                    continue;
+                }
+                currentImgId = generateImgId();
+                Image image = getImage(currentImgId);
+                if (image != null) {
+                    synchronized (next) {
+                        next.add(image);
+                    }
+                }
+                System.out.println("loaded image " + currentImgId);
                 delay = baseDelay + (int) (new Random().nextFloat() * maxRandomVariation - (float) maxRandomVariation /2);
                 System.out.println("Delay: " + delay);
                 Thread.sleep(delay);
             }
-            catch (IOException | InterruptedException ex) {
+            catch (InterruptedException ex) {
                 ex.getStackTrace();
             }
         }
+    }
+
+    private Image getImage(String id) {
+        try {
+            Document doc = Jsoup.connect("https://prnt.sc/" + id)
+                    .userAgent("Mozilla/5.0")
+                    .get();
+
+            Element img = doc.selectFirst("img.screenshot-image");
+            if (img == null) {
+                return null;
+            }
+
+            String src = img.attr("src");
+
+            if (src.isEmpty())
+                return null;
+
+            if (!src.startsWith("https://"))
+                src = src.startsWith("//") ? "https:" + src : "https://" + src;
+
+            if (!id.equals(img.attr("image-id"))) {
+                return null;
+            }
+
+            BufferedImage rawImage = ImageIO.read(new URL(src));
+            if (rawImage == null) {
+                return null;
+            }
+            String hash = Helper.sha1(rawImage);
+
+            if (parent.blockedHashes.contains(hash)) {
+                return null;
+            }
+
+            System.out.println(id + " " + hash);
+
+            return new Image(rawImage, id);
+
+        } catch (Exception e) {
+            System.out.println(Arrays.toString(e.getStackTrace()));
+            return null;
+        }
+    }
+
+    private String generateImgId() {
+        return generateImgId(0);
+    }
+
+    private String generateImgId(int recursionLevel) {
+        StringBuilder imgId = new StringBuilder();
+
+        // 6 characters: numbers (0-9) and lowercase letters (a-z)
+        for (int i = 0; i < 6; i++) {
+            int choice = random.nextInt(36); // 10 digits + 26 letters
+
+            if (choice < 10) {
+                imgId.append((char) (48 + choice)); // '0'..'9'
+            } else {
+                imgId.append((char) (97 + choice - 10)); // 'a'..'z'
+            }
+        }
+
+        // avoid IDs starting with 0
+        if (imgId.charAt(0) == '0') {
+            if (recursionLevel <= 50) {
+                return generateImgId(recursionLevel + 1);
+            } else {
+                return "abcdef"; // will for sure be skipped
+            }
+        }
+
+        // 33.3% chance for 7 char id
+        if (random.nextInt(3) == 0) {
+
+            // starts with 1 (3:1 chance)
+            if (random.nextInt(5) <= 3) {
+                imgId.insert(0, '1');
+            } else {
+                // starts with 2, second char must be digit
+                imgId.setCharAt(0, (char) ('0' + random.nextInt(10)));
+                imgId.insert(0, '2');
+            }
+        }
+
+        return imgId.toString();
     }
 
     void start() {
         thread.start();
     }
 
-    BufferedImage getCurrent() {
+    Image getCurrent() {
         return current;
     }
 
-    BufferedImage getNext() throws NoSuchElementException{
+    Image getNext() throws NoSuchElementException{
         if (next.isEmpty()) {
             throw new NoSuchElementException("Es gibt keine nächsten Bilder");
         }
-        BufferedImage temporary;
+        Image temporary;
         temporary = next.getFirst();
         next.removeFirst();
         previous.addFirst(current);
@@ -101,11 +164,11 @@ public class BackgroundLoader {
         return current;
     }
 
-    BufferedImage getPrevious() throws NoSuchElementException {
+    Image getPrevious() throws NoSuchElementException {
         if (previous.isEmpty()) {
             throw new NoSuchElementException("Es gibt keine vorherigen Bilder");
         }
-        BufferedImage temporary;
+        Image temporary;
         temporary = previous.getFirst();
         previous.removeFirst();
         next.addFirst(current);
@@ -113,7 +176,7 @@ public class BackgroundLoader {
         return current;
     }
 
-    BufferedImage removeCurrentImage() {
+    Image removeCurrentImage() {
         if (!next.isEmpty()) {
             current = next.removeFirst();
         }
@@ -121,13 +184,33 @@ public class BackgroundLoader {
             current = previous.removeFirst();
         }
         else {
-            current = new BufferedImage(
+            current = new Image(new BufferedImage(
                     parent.getWidth(),
                     parent.getHeight() - parent.control.getHeight(),
                     BufferedImage.TYPE_INT_RGB
-            );
+            ));
         }
 
         return current;
+    }
+
+    void removeByHash(String hash) {
+        ArrayList<Integer> indexesToRemove = new ArrayList<>();
+        Image image;
+        synchronized (next) {
+            for (int i = next.size() - 1; i >= 0; i--) {
+                image = next.get(i);
+                try {
+                    if (Helper.sha1(image.content).equals(hash) || parent.blockedHashes.contains(Helper.sha1(image.content))) {
+                        indexesToRemove.add(i);
+                    }
+                } catch (NoSuchAlgorithmException | IOException e) {
+                    e.getStackTrace();
+                }
+            }
+            for (int i : indexesToRemove) {
+                next.remove(i);
+            }
+        }
     }
 }

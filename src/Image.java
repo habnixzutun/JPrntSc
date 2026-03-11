@@ -1,29 +1,21 @@
-import java.awt.*;
 import java.awt.image.BufferedImage;
-import javax.swing.*;
 
-public class Image extends Container {
-    Window parent;
-    JLabel imageLabel;
+public class Image {
+    BufferedImage content;
+    String id;
 
-    Image(Window parent) {
-        setLayout(new FlowLayout());
-
-        this.parent = parent;
-
-        imageLabel = new JLabel(new ImageIcon());
-        add(imageLabel);
+    Image(BufferedImage content) {
+        this.content = content;
+        this.id = "";
     }
 
-    void setImage(BufferedImage image) {
-        System.out.println(image.getHeight());
-        System.out.println(image.getWidth());
+    Image(BufferedImage content, String id) {
+        this.content = content;
+        this.id = id;
+    }
 
-        parent.setSize(new Dimension(image.getWidth(), image.getHeight() + parent.control.height));
-
-
-        imageLabel.setIcon(new ImageIcon(image));
-        imageLabel.revalidate();
-        imageLabel.repaint();
+    Image(BufferedImage content, int id) {
+        this.content = content;
+        this.id = String.valueOf(id);
     }
 }

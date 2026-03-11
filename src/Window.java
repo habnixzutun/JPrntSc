@@ -1,17 +1,16 @@
 import java.awt.*;
 import javax.swing.*;
-import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class Window extends JFrame {
     Container frame;
     Control control;
-    Image imageContainer;
+    ImageHandler imageContainer;
     BackgroundLoader backgroundLoader;
     HashSet<String> blockedHashes;
     String hashFilePath = "hashes.txt";
@@ -23,6 +22,11 @@ public class Window extends JFrame {
         setAutoRequestFocus(true);
         setResizable(false);
 
+        File imageFolder = new File("images/");
+        if (!imageFolder.exists()) {
+            imageFolder.mkdirs();
+        }
+
         blockedHashes = loadHashes(hashFilePath);
 
         frame = getContentPane();
@@ -32,7 +36,7 @@ public class Window extends JFrame {
         control = new Control(this);
         frame.add(control, BorderLayout.SOUTH);
 
-        imageContainer = new Image(this);
+        imageContainer = new ImageHandler(this);
         frame.add(imageContainer, BorderLayout.CENTER);
 
         backgroundLoader = new BackgroundLoader(this);

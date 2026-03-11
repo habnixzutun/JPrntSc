@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.NoSuchElementException;
 
@@ -91,7 +92,8 @@ public class Control extends Container {
     }
     void save(){
         try {
-            ImageIO.write(parent.backgroundLoader.getCurrent(), "png", new File("images/" + 1 + ".png"));
+            Image image = parent.backgroundLoader.getCurrent();
+            ImageIO.write(image.content, "png", new File("images/" + image.id + ".png"));
             System.out.println("saved image");
         }
         catch (IOException e) {
@@ -100,15 +102,17 @@ public class Control extends Container {
     }
     void block () {
         try {
-            String hash = Helper.sha1(parent.backgroundLoader.getCurrent());
+            String hash = Helper.sha1(parent.backgroundLoader.getCurrent().content);
 
-            try (FileWriter writer = new FileWriter("hashes.txt", true)) {
+            try (FileWriter writer = new FileWriter(parent.hashFilePath, true)) {
                 writer.write(hash + "\n");
             }
             parent.imageContainer.setImage(
                     parent.backgroundLoader.removeCurrentImage()
             );
             System.out.println("blocked image");
+            parent.backgroundLoader.removeByHash(hash);
+            parent.blockedHashes.add(hash);
         }
         catch (IOException | NoSuchAlgorithmException e) {
             JOptionPane.showMessageDialog(parent, "Es ist ein Fehler aufgetreten", "Error", JOptionPane.ERROR_MESSAGE);
@@ -116,9 +120,28 @@ public class Control extends Container {
 
     }
 
-    void openFolder() {}
+    void openFolder() {
+        try {
+            File folder = new File("images/");
 
-    void openBrowser() {}
+            if (!folder.exists()) {
+                folder.mkdirs(); // optional
+            }
+
+            Desktop.getDesktop().open(folder);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    void openBrowser() {
+        try {
+            Desktop.getDesktop().browse(new URI(parent.getTitle()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     void next() {
         try {
