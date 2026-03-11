@@ -9,6 +9,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 public class BackgroundLoader {
     Window parent;
@@ -16,6 +17,7 @@ public class BackgroundLoader {
     private final List<BufferedImage> next;
     private BufferedImage current;
     private final Thread thread;
+    private final int maxBufferSize = 50;
     BackgroundLoader(Window parent) {
         this.parent = parent;
         previous = new ArrayList<>();
@@ -23,7 +25,7 @@ public class BackgroundLoader {
         thread = new Thread(this::searchAndStoreImages);
 
         try {
-            current = getImage("https://http.cat/403");
+            current = getImage("https://http.cat/100");
         }
         catch (IOException | InterruptedException ex) {
             ex.getStackTrace();
@@ -50,13 +52,23 @@ public class BackgroundLoader {
         return image;
     }
 
+    String generateId() {
+        return "";
+    }
+
     void searchAndStoreImages() {
         int[] codes = new int[] {200, 400, 401, 403, 404, 500, 501};
+        int maxRandomVariation = 300;
+        int baseDelay = 500;
+        int delay;
 
         for (int code : codes) {
             try {
                 next.add(getImage("https://http.cat/" + code));
                 System.out.println("loaded image " + code);
+                delay = baseDelay + (int) (new Random().nextFloat() * maxRandomVariation - (float) maxRandomVariation /2);
+                System.out.println("Delay: " + delay);
+                Thread.sleep(delay);
             }
             catch (IOException | InterruptedException ex) {
                 ex.getStackTrace();
@@ -81,6 +93,11 @@ public class BackgroundLoader {
         next.removeFirst();
         previous.addFirst(current);
         current = temporary;
+
+        if (previous.size() > maxBufferSize) {
+            previous.removeLast();
+        }
+
         return current;
     }
 
