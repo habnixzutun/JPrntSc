@@ -203,12 +203,8 @@ public class BackgroundLoader {
         synchronized (next) {
             for (int i = next.size() - 1; i >= 0; i--) {
                 image = next.get(i);
-                try {
-                    if (Helper.sha1(image.content).equals(hash) || parent.blockedHashes.contains(Helper.sha1(image.content))) {
-                        indexesToRemove.add(i);
-                    }
-                } catch (NoSuchAlgorithmException | IOException e) {
-                    e.getStackTrace();
+                if (image.hash.equals(hash) || parent.blockedHashes.contains(image.hash)) {
+                    indexesToRemove.add(i);
                 }
             }
             for (int i : indexesToRemove) {

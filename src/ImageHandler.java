@@ -22,7 +22,7 @@ public class ImageHandler extends Container {
     void waitForFirstImage() {
         Image currentImage = parent.backgroundLoader.getCurrent();
         while (currentImage == null) {
-            currentImage = parent.backgroundLoader.getCurrent();
+            currentImage = parent.backgroundLoader.getNext();
             try {
                 Thread.sleep(50);
                 System.out.println("Waiting for image in current");
