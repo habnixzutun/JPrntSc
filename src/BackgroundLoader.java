@@ -144,6 +144,9 @@ public class BackgroundLoader {
     }
 
     Image getCurrent() {
+        if (!next.isEmpty() && current == null) {
+            return getNext();
+        }
         return current;
     }
 

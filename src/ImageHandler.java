@@ -4,6 +4,8 @@ import javax.swing.*;
 public class ImageHandler extends Container {
     Window parent;
     JLabel imageLabel;
+    private final Thread thread;
+    boolean imageSet = false;
 
     ImageHandler(Window parent) {
         setLayout(new FlowLayout());
@@ -12,6 +14,23 @@ public class ImageHandler extends Container {
 
         imageLabel = new JLabel(new ImageIcon());
         add(imageLabel);
+
+        thread = new Thread(this::waitForFirstImage);
+        thread.start();
+    }
+
+    void waitForFirstImage() {
+        Image currentImage = parent.backgroundLoader.getCurrent();
+        while (currentImage == null) {
+            currentImage = parent.backgroundLoader.getCurrent();
+            try {
+                Thread.sleep(50);
+                System.out.println("Waiting for image in current");
+                System.out.println(currentImage);
+            }
+            catch (InterruptedException ignored) {}
+        }
+        setImage(currentImage);
     }
 
     void setImage(Image image) {
@@ -25,7 +44,7 @@ public class ImageHandler extends Container {
         if (width < 680) {
             width = 680;
         }
-        parent.setSize(new Dimension(width, height + parent.control.height));
+        parent.setSize(new Dimension(width, height + parent.control.height * 2));
         parent.setTitle("https://prnt.sc/" + image.id);
 
 

@@ -36,10 +36,11 @@ public class Window extends JFrame {
         control = new Control(this);
         frame.add(control, BorderLayout.SOUTH);
 
+        backgroundLoader = new BackgroundLoader(this);
+
         imageContainer = new ImageHandler(this);
         frame.add(imageContainer, BorderLayout.CENTER);
 
-        backgroundLoader = new BackgroundLoader(this);
         backgroundLoader.start();
     }
 
