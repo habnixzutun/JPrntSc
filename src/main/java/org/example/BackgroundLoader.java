@@ -1,22 +1,26 @@
+package org.example;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
 public class BackgroundLoader {
-    Window parent;
+    Main parent;
     private final ArrayList<Image> previous;
     private final ArrayList<Image> next;
     private Image current;
     private final Thread thread;
     private final int maxBufferSize = 50;
     private final Random random = new Random();
-    BackgroundLoader(Window parent) {
+    BackgroundLoader(Main parent) {
         this.parent = parent;
         previous = new ArrayList<Image>();
         next = new ArrayList<>();
@@ -145,7 +149,10 @@ public class BackgroundLoader {
 
     Image getCurrent() {
         if (!next.isEmpty() && current == null) {
-            return getNext();
+            try {
+                return next.getFirst();
+            }
+            catch (NoSuchElementException ignored) {}
         }
         return current;
     }

@@ -1,13 +1,16 @@
-import java.awt.*;
+package org.example;
+
 import javax.swing.*;
+import java.awt.*;
+import java.util.NoSuchElementException;
 
 public class ImageHandler extends Container {
-    Window parent;
+    Main parent;
     JLabel imageLabel;
     private final Thread thread;
     boolean imageSet = false;
 
-    ImageHandler(Window parent) {
+    ImageHandler(Main parent) {
         setLayout(new FlowLayout());
 
         this.parent = parent;
@@ -22,7 +25,12 @@ public class ImageHandler extends Container {
     void waitForFirstImage() {
         Image currentImage = parent.backgroundLoader.getCurrent();
         while (currentImage == null) {
-            currentImage = parent.backgroundLoader.getNext();
+            try {
+                System.out.println(1);
+                currentImage = parent.backgroundLoader.getNext();
+                System.out.println(2);
+            }
+            catch (NoSuchElementException ignored) {}
             try {
                 Thread.sleep(50);
                 System.out.println("Waiting for image in current");

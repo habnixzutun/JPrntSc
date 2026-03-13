@@ -1,15 +1,19 @@
+package org.example;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.util.NoSuchElementException;
 
 public class Control extends Container {
-    Window parent;
+    Main parent;
     JButton backButton;
     JButton saveButton;
     JButton blockButton;
@@ -17,7 +21,7 @@ public class Control extends Container {
     JButton openBrowserButton;
     JButton nextButton;
     int height = 40;
-    public Control(Window parent) {
+    public Control(Main parent) {
         this.parent = parent;
         setPreferredSize(new Dimension(0, height));
         setLayout(new FlowLayout());
@@ -93,7 +97,7 @@ public class Control extends Container {
     void save(){
         try {
             Image image = parent.backgroundLoader.getCurrent();
-            ImageIO.write(image.content, "png", new File("images/" + image.id + ".png"));
+            ImageIO.write(image.content, "png", new File("src/main/resources/images/" + image.id + ".png"));
             System.out.println("saved image");
         }
         catch (IOException e) {
@@ -122,7 +126,7 @@ public class Control extends Container {
 
     void openFolder() {
         try {
-            File folder = new File("images/");
+            File folder = new File("src/main/resources/images/");
 
             if (!folder.exists()) {
                 folder.mkdirs(); // optional

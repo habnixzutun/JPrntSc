@@ -1,5 +1,7 @@
-import java.awt.*;
+package org.example;
+
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,7 +9,7 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-public class Window extends JFrame {
+public class Main extends JFrame {
     Container frame;
     Control control;
     ImageHandler imageContainer;
@@ -15,14 +17,14 @@ public class Window extends JFrame {
     HashSet<String> blockedHashes;
     String hashFilePath = "hashes.txt";
 
-    public Window() {
+    public Main() {
         setSize(680, 550);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("prnt.sc");
         setAutoRequestFocus(true);
         setResizable(false);
 
-        File imageFolder = new File("images/");
+        File imageFolder = new File("src/main/resources/images/");
         if (!imageFolder.exists()) {
             imageFolder.mkdirs();
         }
@@ -37,11 +39,11 @@ public class Window extends JFrame {
         frame.add(control, BorderLayout.SOUTH);
 
         backgroundLoader = new BackgroundLoader(this);
+        backgroundLoader.start();
 
         imageContainer = new ImageHandler(this);
         frame.add(imageContainer, BorderLayout.CENTER);
 
-        backgroundLoader.start();
     }
 
     static HashSet<String> loadHashes(String filePath) {
@@ -57,7 +59,7 @@ public class Window extends JFrame {
     }
 
     public static void main(String[] args) {
-        Window window = new Window();
+        Main window = new Main();
         window.setVisible(true);
     }
 }
