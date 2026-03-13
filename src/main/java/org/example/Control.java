@@ -20,7 +20,7 @@ public class Control extends Container {
     JButton openFolderButton;
     JButton openBrowserButton;
     JButton nextButton;
-    int height = 40;
+    static int height = 40;
     public Control(Main parent) {
         this.parent = parent;
         setPreferredSize(new Dimension(0, height));
@@ -97,7 +97,7 @@ public class Control extends Container {
     void save(){
         try {
             Image image = parent.backgroundLoader.getCurrent();
-            ImageIO.write(image.content, "png", new File("src/main/resources/images/" + image.id + ".png"));
+            ImageIO.write(image.original, "png", new File("src/main/resources/images/" + image.id + ".png"));
             System.out.println("saved image");
         }
         catch (IOException e) {
@@ -106,7 +106,7 @@ public class Control extends Container {
     }
     void block () {
         try {
-            String hash = Helper.sha1(parent.backgroundLoader.getCurrent().content);
+            String hash = Helper.sha1(parent.backgroundLoader.getCurrent().original);
 
             try (FileWriter writer = new FileWriter(parent.hashFilePath, true)) {
                 writer.write(hash + "\n");

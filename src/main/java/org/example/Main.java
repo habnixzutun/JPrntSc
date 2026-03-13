@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class Main extends JFrame {
+    static int frameWidth;
+    static int frameHeight;
     Container frame;
     Control control;
     ImageHandler imageContainer;
@@ -18,7 +20,8 @@ public class Main extends JFrame {
     String hashFilePath = "hashes.txt";
 
     public Main() {
-        setSize(680, 550);
+        calculateFrameSize();
+        setSize(frameWidth, frameHeight);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setTitle("prnt.sc");
         setAutoRequestFocus(true);
@@ -56,6 +59,13 @@ public class Main extends JFrame {
             System.err.println("Fehler beim Lesen: " + e.getMessage());
             return new HashSet<>(); // Oder Exception werfen
         }
+    }
+
+    private void calculateFrameSize() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
+        frameWidth = (int) (screenSize.width * 0.8);
+        frameHeight = (int) (screenSize.height * 0.8);
     }
 
     public static void main(String[] args) {
